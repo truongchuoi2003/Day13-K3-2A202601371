@@ -1,19 +1,19 @@
 alerts:
-  - name: TODO_alert_1
-    severity: TODO
-    condition: TODO
+  - name: API P95 latency vượt SLO
+    severity: critical
+    condition: latency_p95_ms > 3000 trong 5 phút liên tiếp
     type: symptom-based
-    owner: TODO
+    owner: Dashboard, SLO & Alert
     runbook: docs/alerts.md#alert-1
-  - name: TODO_alert_2
-    severity: TODO
-    condition: TODO
+  - name: Tỷ lệ lỗi request vượt SLO
+    severity: critical
+    condition: error_rate_pct > 2 trong 5 phút liên tiếp
     type: symptom-based
-    owner: TODO
+    owner: Dashboard, SLO & Alert
     runbook: docs/alerts.md#alert-2
-  - name: TODO_alert_3
-    severity: TODO
-    condition: TODO
+  - name: Chi phí request vượt ngân sách ngày
+    severity: warning
+    condition: daily_cost_usd > 2.5 trong 15 phút liên tiếp
     type: symptom-based
-    owner: TODO
+    owner: Dashboard, SLO & Alert
     runbook: docs/alerts.md#alert-3
