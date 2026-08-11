@@ -43,5 +43,6 @@ git status --short                    # không lộ secret/PII
 
 - [x] **CP1 — Logging & PII (Người 1)**: hoàn thành. `python scripts/validate_logs.py` → **100/100**, `python -m pytest -q` → 22/22 pass. Đã sửa `app/middleware.py`, `app/main.py`, `app/logging_config.py`, `app/pii.py`.
 - [ ] **CP1 — Tracing & Prompt Version (Người 2)**: chưa bắt đầu.
-- [ ] **CP1 — Dashboard/SLO/Alert (Người 3)**: chưa bắt đầu.
-- [ ] **CP2, CP3, Report & Demo**: chưa bắt đầu.
+- [x] **CP1 — Dashboard/SLO/Alert (Người 3)**: hoàn thành. Đã hoàn thiện SLO, 3 alert và runbook.
+- [x] **CP2 — Dashboard (Người 3)**: hoàn thành. Dashboard runtime đọc `data/logs.jsonl`, đủ 6 panel; validator đạt 6/6; evidence ở `submission/evidence/dashboard-cp2.png`.
+- [ ] **CP2 — Tracing (Người 2), CP3, Report & Demo**: chưa bắt đầu.
