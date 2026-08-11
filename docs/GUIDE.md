@@ -28,7 +28,7 @@ Chạy `python scripts/validate_dashboard.py` trước. Nếu validator qua như
 
 ## Khi prompt luôn hiện `local-v1`
 
-1. Kiểm tra `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` và `LANGFUSE_HOST`.
+1. Kiểm tra `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` và `LANGFUSE_BASE_URL`.
 2. Kiểm tra prompt name/label trong `.env` có tồn tại trên đúng project không.
 3. Khởi động lại API sau khi đổi `.env`.
 4. Mở trace metadata: `prompt_source=local` nghĩa là chưa bật Langfuse; `local-fallback` nghĩa là đã bật nhưng fetch prompt lỗi.
