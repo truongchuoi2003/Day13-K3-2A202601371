@@ -45,4 +45,6 @@ git status --short                    # không lộ secret/PII
 - [ ] **CP1 — Tracing & Prompt Version (Người 2)**: chưa bắt đầu.
 - [x] **CP1 — Dashboard/SLO/Alert (Người 3)**: hoàn thành. Đã hoàn thiện SLO, 3 alert và runbook.
 - [x] **CP2 — Dashboard (Người 3)**: hoàn thành. Dashboard runtime đọc `data/logs.jsonl`, đủ 6 panel; validator đạt 6/6; evidence ở `submission/evidence/dashboard-cp2.png`.
-- [ ] **CP2 — Tracing (Người 2), CP3, Report & Demo**: chưa bắt đầu.
+- [ ] **CP2 — Tracing (Người 2)**: chưa bắt đầu.
+- [x] **CP3 — Incident (Người 3)**: đã chạy challenge `rag_slow`, thu metrics/log/dashboard evidence và cập nhật report. Trace/span evidence chờ Người 2 cấu hình Langfuse.
+- [ ] **Report & Demo**: chưa hoàn tất.
