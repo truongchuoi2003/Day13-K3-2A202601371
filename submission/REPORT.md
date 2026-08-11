@@ -14,7 +14,7 @@
 ## 2. Kết quả kỹ thuật
 
 - Điểm `validate_logs.py`: 100/100 (52 log records; 0 lỗi required field; 0 lỗi enrichment; 27 correlation ID duy nhất; 0 PII leak) — xem `submission/evidence/validate_logs_result.txt`.
-- Tổng số traces: 0 — Langfuse chưa được cấu hình trong môi trường kiểm tra (`tracing_enabled: false`).
+- Tổng số traces: ít nhất 10 — xem `submission/evidence/trace-list-10plus.png`.
 - Số PII leak còn lại: 0 — email, số điện thoại VN và số thẻ tín dụng test đều được redact trước khi ghi log (xem `submission/evidence/pii_redaction_proof.txt`).
 - Link/đường dẫn dashboard: `scripts/dashboard.py` — chạy `python scripts/dashboard.py`, sau đó mở `http://127.0.0.1:8501`.
 
@@ -22,16 +22,20 @@
 
 - Evidence correlation ID: `submission/evidence/correlation_id_sample.json` — hai log `request_received` và `response_sent` của cùng một request đều mang `correlation_id="req-0a135911"`, chứng minh `CorrelationIdMiddleware` sinh ID và giữ nguyên xuyên suốt vòng đời request qua `structlog` contextvars.
 - Evidence PII redaction: `submission/evidence/pii_redaction_proof.txt` — request test gửi email `test@example.com`, SĐT `0912345678`, số thẻ `1234 5678 9012 3456`; log ghi lại `payload.message_preview` đã thay bằng `[REDACTED_EMAIL]`, `[REDACTED_PHONE_VN]`, `[REDACTED_CREDIT_CARD]`, không còn dữ liệu gốc nào lộ ra trong `data/logs.jsonl`.
-- Evidence trace waterfall: Chưa có. Cần cấu hình `LANGFUSE_PUBLIC_KEY` và `LANGFUSE_SECRET_KEY`, tạo trace thật rồi lưu ảnh waterfall vào `submission/evidence/`.
-- Giải thích một span đáng chú ý: Chưa có trace/span thật để phân tích. Trong incident `rag_slow`, span cần kiểm tra sau khi bật Langfuse là retrieval/RAG, vì metric và log cho thấy độ trễ tăng khoảng 2.5 giây.
+- Evidence trace waterfall: `submission/evidence/trace-waterfall-production-v1.png` — trace production version 1.
+- Giải thích một span đáng chú ý: Waterfall thể hiện hierarchy agent → retriever → generation. Khi điều tra latency, so sánh thời lượng retrieval với generation để khoanh vùng bước gây chậm trước khi tra log cùng correlation ID.
 
 ## 4. Prompt versioning
 
-- Prompt name: `day13-chat` (contract; chưa tạo managed prompt trên Langfuse).
-- Version/label baseline: Chưa có — cần tạo version 1 với labels `baseline` và `production`.
-- Version/label candidate: Chưa có — cần tạo version 2 với label `candidate`.
-- Trace ID của mỗi version: Chưa có vì tracing chưa được bật.
-- Bằng chứng đổi label hoặc rollback: Chưa có. Người 2 cần chuyển `production` sang version 2, chạy request, rollback về version 1 và lưu ảnh evidence.
+- Prompt name: `day13-chat`
+- Version/label baseline: version 1 — `baseline`
+- Version/label candidate: version 2 — `candidate`
+- Trace ID của mỗi version:
+  - baseline v1: `64bf6bf32feae3b4154cf78cd09e31e4` (`req-8c81c61b`)
+  - candidate v2: `6382009567025aef1fc2af0ba24858d9` (`req-c8df8bd0`)
+  - production v2 trước rollback: `280a42d8fa2d996901758853d9f88435` (`req-5c061fad`)
+  - production v1 sau rollback: `792a67173fd84ff3e643a1f6b684af8a` (`req-0eeab3db`)
+- Bằng chứng đổi label hoặc rollback: Đã chuyển label `production` từ version 1 sang version 2, tạo trace xác nhận; sau đó rollback `production` về version 1 và trace `req-0eeab3db` xác nhận `prompt_name=day13-chat`, `prompt_label=production`, `prompt_version=1`. Evidence: `prompt-versions-rollback.png`, `trace-waterfall-production-v1.png`, `trace-metadata-production-v1.png`, `trace-list-10plus.png`.
 
 ## 5. Dashboard, SLO và alerts
 
@@ -57,5 +61,5 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 | Thành viên                                      | Phần việc                                                                                                                                                        | Commit/PR                                                                  | Điều đã học                                                                                                                                                                                                                                |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Người 1 (Logging & PII) | Correlation ID middleware, enrich log context (`user_id_hash`, `session_id`, `feature`, `model`, `env`), bật PII scrubbing processor, thêm pattern PII và evidence CP1 | `60c47db`, `c2121c3` | Thứ tự processor trong `structlog` quyết định dữ liệu có được scrub trước khi ghi file hay không; `contextvars` lan truyền context xuyên middleware → handler → log mà không cần truyền tham số thủ công. |
-| Người 2 (Tracing & Prompt Version) | Chưa hoàn thành: Langfuse chưa cấu hình, chưa có managed prompt v1/v2, trace, label switch hoặc rollback evidence. | Chưa có commit/evidence cho phần này. | Cần cấu hình Langfuse, sau đó kiểm tra metadata `prompt_name`, `prompt_label`, `prompt_version` trên trace thật. |
+| Người 2 (Tracing & Prompt Version) | Cấu hình Langfuse v4.14.3; tạo prompt `day13-chat` v1/v2 với label baseline/candidate; instrument agent/retriever/generation; promote và rollback label `production`; lưu evidence. | _(điền SHA commit của Người 2)_ | Metadata prompt liên kết trace với đúng version/label; hierarchy agent–retriever–generation hỗ trợ phân tích latency, token và cost theo từng bước. |
 | Người 3 (Dashboard/SLO/Alert + Incident/Report) | Hoàn thiện SLO, 3 alert symptom-based và runbook; xây dashboard runtime 6 panel từ `data/logs.jsonl`; chạy validator, điều tra `rag_slow` và lưu evidence CP2/CP3. | `4668964` (dashboard); thay bằng SHA commit cuối sau khi commit các cập nhật CP3/report. | Đọc JSONL để tính percentile, traffic, error rate, cost, token và quality; thiết kế SLO/alert theo chỉ số người dùng quan sát được. |
